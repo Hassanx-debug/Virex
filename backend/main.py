@@ -1,10 +1,12 @@
+import os
+import yt_dlp
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI()
 
-# Allow frontend to talk to backend
+# Allow frontend access
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,7 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Data model (what frontend will send)
 class VideoRequest(BaseModel):
     url: str
 
@@ -23,8 +24,18 @@ def root():
 
 @app.post("/generate-clips")
 def generate_clips(data: VideoRequest):
-    print("Received URL:", data.url)
-    return {
-        "message": "YouTube link received successfully",
-        "received_url": data.url
+    output_dir = "downloads"
+
+    ydl_opts = {
+        "outtmpl": f"{output_dir}/%(title)s.%(ext)s",
+        "format": "mp4"
     }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([data.url])
+
+        return {"message": "Video downloaded successfully"}
+
+    except Exception as e:
+        return {"error": str(e)}
