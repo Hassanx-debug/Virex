@@ -1,24 +1,53 @@
 "use client";
+import { useState } from "react";
 
 export default function Home() {
+  const [url, setUrl] = useState("");
+
   const handleGenerate = async () => {
-    console.log("clicked");
+    if (!url) {
+      alert("Please paste a YouTube link first");
+      return;
+    }
 
-    const res = await fetch("http://localhost:8000");
-    const data = await res.json();
+    try {
+      const res = await fetch("http://localhost:8000/generate-clips", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url }),
+      });
 
-    console.log("DATA FROM BACKEND:", data);
-    alert("SUCCESS: backend connected");
+      const data = await res.json();
+      console.log("Backend response:", data);
+      alert("YouTube link sent successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to send link to backend");
+    }
   };
 
   return (
-    <main style={{ background: "black", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-      <button
-        onClick={handleGenerate}
-        style={{ padding: "20px", fontSize: "18px", cursor: "pointer" }}
-      >
-        Generate Clips
-      </button>
+    <main className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="w-full max-w-md space-y-4">
+        <h1 className="text-3xl font-bold text-center">Virex</h1>
+
+        <input
+          type="text"
+          placeholder="Paste YouTube video link"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          className="w-full p-3 rounded text-black"
+        />
+
+        <button
+          onClick={handleGenerate}
+          className="w-full bg-purple-600 p-3 rounded hover:bg-purple-700"
+        >
+          Generate Clips
+        </button>
+      </div>
     </main>
   );
 }
