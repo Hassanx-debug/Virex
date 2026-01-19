@@ -11,13 +11,16 @@ export default function Home() {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/generate-clips", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate-clips`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url }),
+        }
+      );
 
       const data = await res.json();
       console.log("Backend response:", data);
